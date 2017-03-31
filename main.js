@@ -135,19 +135,21 @@ function renderBeads(x, y) {
 	const beadHeight = getBeadHeight(mBeadWidth);
 	colorReduce(mBeads.data, mBeadWidth, beadHeight, palette);	
     }
-
+    var halfBeadWidthSize = mBeadWidthSize/2;
+    var twoPi = 2*Math.PI;
+    var xOffset = mPosX + halfBeadWidthSize;
+    var yOffset = mPosY + halfBeadWidthSize;    
     for (var y = 0; y < mBeads.height; y++) {
 	for (var x = 0; x < mBeads.width; x++) {
-		var p = (y * mBeads.width + x)*3
-                ctx.beginPath();
-                ctx.fillStyle = 'rgba(' + mBeads.data[p] + ',' + mBeads.data[p+1] + ',' + mBeads.data[p+2] + ",255)";
-                ctx.arc(mBeadWidthSize/2 + x*mBeadWidthSize, mBeadWidthSize/2+y*mBeadWidthSize, mBeadWidthSize/2,0, 2*Math.PI, true);
-                ctx.closePath();
-                ctx.fill(); 
+	    var p = (y * mBeads.width + x)*3
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(' + mBeads.data[p] + ',' + mBeads.data[p+1] + ',' + mBeads.data[p+2] + ",255)";
+            ctx.arc(xOffset + x*mBeadWidthSize,
+		    yOffset + y*mBeadWidthSize, halfBeadWidthSize,0, twoPi, true);
+            ctx.closePath();
+            ctx.fill(); 
         }
     }	
- 
-
 }
 
 function loadImage(src){
