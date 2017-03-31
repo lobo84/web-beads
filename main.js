@@ -22,13 +22,57 @@ function closestColor(c, palette) {
 }
 
 function colorReduce(data, width, height, palette) {
-    for (var y = 0; y < height*3; y++) {
-	for (var x = 0; x < width*3; x++) {
-	    var idx = (y * width + x)*3;
-	    closest = closestColor(data.slice(idx,idx+3), palette);
-	    data[idx] = closest[0];
-	    data[idx+1] = closest[1];
-	    data[idx+2] = closest[2];	    
+    if (!mDither) {
+	for (var y = 0; y < height*3; y++) {
+	    for (var x = 0; x < width*3; x++) {
+		var idx = (y * width + x)*3;
+		closest = closestColor(data.slice(idx,idx+3), palette);
+		data[idx] = closest[0];
+		data[idx+1] = closest[1];
+		data[idx+2] = closest[2];	    
+	    }
+	}
+    }
+    else {
+	for (var y = 0; y < height*3; y++) {
+	    for (var x = 0; x < width*3; x++) {
+		var idx = (y * width + x)*3;
+		closest = closestColor(data.slice(idx,idx+3), palette);
+		var old1 = data[idx];
+		var old2 = data[idx+1];
+		var old3 = data[idx+2];
+		data[idx] = closest[0];
+		data[idx+1] = closest[1];
+		data[idx+2] = closest[2];
+		var qerr1 = old1 - closest[0];
+		var qerr2 = old2 - closest[1];
+		var qerr3 = old3 - closest[2];
+		
+		idx = (y*width + x+1)*3;
+		var c = 7.0/16.0;
+		data[idx] = data[idx] + Math.round(qerr1 * c);
+		data[idx+1] = data[idx+1] + Math.round(qerr2 * c);
+		data[idx+2] = data[idx+2] + Math.round(qerr3 * c);
+
+		idx = ((y+1)*width + x-1)*3;
+		c = 3.0 / 16.0
+		data[idx] = data[idx] + Math.round(qerr1 * c);
+		data[idx+1] = data[idx+1] + Math.round(qerr2 * c);
+		data[idx+2] = data[idx+2] + Math.round(qerr3 * c);
+		
+		idx = ((y+1)*width + x)*3;
+		c = 5.0 / 16.0
+		data[idx] = data[idx] + Math.round(qerr1 * c);
+		data[idx+1] = data[idx+1] + Math.round(qerr2 * c);
+		data[idx+2] = data[idx+2] + Math.round(qerr3 * c);
+		
+		idx = ((y+1)*width + x+1)*3;
+		c = 1.0 / 16.0
+		data[idx] = data[idx] + Math.round(qerr1 * c);
+		data[idx+1] = data[idx+1] + Math.round(qerr2 * c);
+		data[idx+2] = data[idx+2] + Math.round(qerr3 * c);
+		
+	    }
 	}
     }
 }
@@ -95,7 +139,7 @@ var mBeads = null;
 var mPosX = 0;
 var mPosY = 0;
 var mUpdateBeads = true;
-
+var mDither = false;
 
 function render(src){
     var img = new Image();
@@ -149,7 +193,9 @@ function renderBeads(x, y) {
             ctx.closePath();
             ctx.fill(); 
         }
-    }	
+    }
+
+    
 }
 
 function loadImage(src){
@@ -208,6 +254,18 @@ $(function() {
 	    mBeadWidthSize = data.from;
 	    renderBeads(mPosX, mPosY);
 	}	   
+    });
+    
+    $('#ditherChk').change(function() {
+	if($(this).is(":checked")) {
+	    mUpdateBeads = true;
+	    mDither = true;
+	}
+	else {
+	    mUpdateBeads = true;	    
+	    mDither = false;
+	}
+	renderBeads(mPosX, mPosY);	
     });
     
     $( ".color-box" ).click(function(e) {
