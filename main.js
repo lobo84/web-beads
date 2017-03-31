@@ -1,37 +1,5 @@
 var MAX_HEIGHT = 500;
 
-function drawBeads(beads, width, height, beadSize) {
-    r = new Uint8ClampedArray(width * height * 4);
-    var beadSizeBytes = beadSize * 4;
-    var beadsWidthBytes = beads.width * 3;
-    var widthBytes = width * 4;
-    var blockOffset = beadSize * widthBytes;
-    for (var by = 0; by < beads.height; by++) {
-	var byImgOffset = by * blockOffset;
-	for (var y = 0; y < beadSize; y++) {
-	    var yImgOffset = y * widthBytes;
-	    var offset = byImgOffset + yImgOffset;
-	    for (var bx = 0; bx < beads.width; bx++) {
-		var bxImg = offset + bx * beadSizeBytes;
-		var accIdxRed = by * beadsWidthBytes + bx * 3;
-		var accIdxGreen = accIdxRed + 1;
-		var accIdxBlue = accIdxRed + 2;		
-		var red = beads.data[accIdxRed];
-		var green = beads.data[accIdxGreen]; 
-		var blue = beads.data[accIdxBlue];
-		for (var x = 0; x < beadSizeBytes; x+=4) {
-		    var dataIdx = bxImg + x;		    
-		    r[dataIdx] = red;
-		    r[dataIdx + 1] = green;
-		    r[dataIdx + 2] = blue;
-		    r[dataIdx + 3] = 255;
-		}
-	    }
-	}
-    }
-    return r;
-}
-
 function closestColor(c, palette) {
     var result = new Uint8ClampedArray(3);    
     var r = c[0];
@@ -167,18 +135,12 @@ function renderBeads(x, y) {
 	const beadHeight = getBeadHeight(mBeadWidth);
 	colorReduce(mBeads.data, mBeadWidth, beadHeight, palette);	
     }
-    beadPixels = drawBeads(mBeads, canvas.width, canvas.height, mBeadWidthSize);	
-    	ctx.clearRect(0, 0, canvas.width, canvas.height);
-//	ctx.drawImage(img, 0, 0, img.width, img.height);
-    newPixels = new ImageData(beadPixels,canvas.width, canvas.height);
-    //ctx.putImageData(newPixels, x ,y)
 
     for (var y = 0; y < mBeads.height; y++) {
 	for (var x = 0; x < mBeads.width; x++) {
 		var p = (y * mBeads.width + x)*3
                 ctx.beginPath();
                 ctx.fillStyle = 'rgba(' + mBeads.data[p] + ',' + mBeads.data[p+1] + ',' + mBeads.data[p+2] + ",255)";
-
                 ctx.arc(mBeadWidthSize/2 + x*mBeadWidthSize, mBeadWidthSize/2+y*mBeadWidthSize, mBeadWidthSize/2,0, 2*Math.PI, true);
                 ctx.closePath();
                 ctx.fill(); 
